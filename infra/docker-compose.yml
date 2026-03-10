@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: e2ee_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-chatuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-chatpass}
+      POSTGRES_DB: ${DB_NAME:-chatdb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: e2ee_redis
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio
+    container_name: e2ee_storage
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  backend:
+    build:
+      context: ../apps/backend
+      dockerfile: Dockerfile
+    container_name: e2ee_backend
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-chatuser}:${DB_PASSWORD:-chatpass}@postgres:5432/${DB_NAME:-chatdb}
+      REDIS_HOST: redis
+      MINIO_ENDPOINT: minio
+      MINIO_ACCESS_KEY: ${MINIO_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_PASSWORD:-minioadmin}
+
+volumes:
+  postgres_data:
+  minio_data:
