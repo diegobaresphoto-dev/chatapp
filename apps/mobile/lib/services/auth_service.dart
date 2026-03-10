@@ -1,7 +1,8 @@
-import 'package:dio/dio.dart';
+import '../config/environment_config.dart';
+import 'package:dio/dio.dart'; // Assuming Dio is used and needs to be imported.
 
 class AuthService {
-  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://localhost:3000')); // Update for production
+  final Dio _dio = Dio(BaseOptions(baseUrl: EnvironmentConfig.baseUrl)); 
 
   Future<Map<String, dynamic>> register(String email, String username, String password, String inviteCode) async {
     try {

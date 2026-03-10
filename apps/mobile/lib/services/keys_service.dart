@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
+import '../config/environment_config.dart';
 
 class KeysService {
   final Dio _dio;
 
   KeysService(String token) : _dio = Dio(BaseOptions(
-    baseUrl: 'http://localhost:3000',
+    baseUrl: EnvironmentConfig.baseUrl,
     headers: {'Authorization': 'Bearer $token'},
   ));
 
